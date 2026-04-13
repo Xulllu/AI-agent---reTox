@@ -1,0 +1,22 @@
+# requirements.txt (reTox)
+
+# Web / API
+flask==3.0.0
+flask-cors==4.0.0
+python-dotenv==1.0.0
+requests==2.31.0
+
+# Toxicity model
+detoxify==0.5.2
+torch==2.2.2
+
+# NLP
+nltk==3.8.1
+spacy==3.7.2
+
+# Optional: sklearn model (joblib artifact)
+scikit-learn==1.4.2
+joblib==1.3.2
+
+# --- Optional (ONLY if you switch scraping to PRAW auth) ---
+# praw==7.7.1

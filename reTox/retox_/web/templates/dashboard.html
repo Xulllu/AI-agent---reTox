@@ -1,0 +1,1019 @@
+<!-- web/templates/dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReTox Dashboard - Multi-Agent Toxicity Detection</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #07070a;
+      --surface: #0f1115;
+      --surface2: #121622;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+
+      --brand: #c2410c;
+      --brand-2: #f97316;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(249,115,22,0.16), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(194,65,12,0.12), transparent 55%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    nav {
+      background: rgba(0,0,0,0.65);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--brand-2);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      list-style: none;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      border-color: rgba(249,115,22,0.22);
+      background: rgba(249,115,22,0.10);
+    }
+
+    .nav-links a.active {
+      background: linear-gradient(135deg, rgba(194,65,12,0.95), rgba(249,115,22,0.85));
+      color: #0b0b0f;
+    }
+
+    .nav-links a:focus-visible {
+      outline: 3px solid rgba(249,115,22,0.35);
+      outline-offset: 2px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background: rgba(15,17,21,0.75);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      color: var(--text);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 22px;
+      letter-spacing: 0.2px;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 0 6px rgba(16,185,129,0.10);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: rgba(18,22,34,0.90);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(249,115,22,0.22);
+    }
+
+    .card-title {
+      color: var(--text);
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.2px;
+    }
+
+    .card-value {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--brand-2);
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .card-label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+      color: var(--text);
+      padding: 14px 14px 0;
+      background: rgba(15,17,21,0.75);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 14px 14px 0 0;
+      backdrop-filter: blur(10px);
+    }
+
+    .table {
+      background: rgba(15,17,21,0.75);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      margin-bottom: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      background: rgba(18,22,34,0.95);
+      color: var(--text);
+      padding: 14px;
+      text-align: left;
+      font-weight: 900;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    tbody td {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: var(--text);
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    tbody tr:hover {
+      background: rgba(249,115,22,0.06);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+      border: 1px solid transparent;
+      display: inline-block;
+      text-transform: uppercase;
+    }
+
+    .badge-clean {
+      background: rgba(16,185,129,0.12);
+      border-color: rgba(16,185,129,0.22);
+      color: #a7f3d0;
+    }
+
+    .badge-borderline, .badge-needs_context {
+      background: rgba(249,115,22,0.12);
+      border-color: rgba(249,115,22,0.22);
+      color: #fdba74;
+    }
+
+    .badge-toxic, .badge-reject, .badge-rejected {
+      background: rgba(239,68,68,0.12);
+      border-color: rgba(239,68,68,0.22);
+      color: #fca5a5;
+    }
+
+    .badge-reviewed {
+      background: rgba(249,115,22,0.12);
+      border-color: rgba(249,115,22,0.22);
+      color: #fdba74;
+      margin-left: 8px;
+    }
+
+    .confidence-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 160px;
+    }
+
+    .bar {
+      width: 120px;
+      height: 8px;
+      background: rgba(255,255,255,0.10);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, rgba(194,65,12,0.95), rgba(249,115,22,0.90));
+      border-radius: 999px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 34px;
+      color: var(--muted);
+    }
+
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.16);
+      border-top: 3px solid rgba(249,115,22,0.85);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 14px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .row-click { cursor: pointer; }
+    .muted { color: var(--muted); }
+
+    .notes {
+      color: rgba(229,231,235,0.92);
+      font-size: 12px;
+      line-height: 1.5;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 10px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    a.link {
+      color: #fdba74;
+      text-decoration: none;
+      font-weight: 800;
+    }
+    a.link:hover { text-decoration: underline; }
+
+    /* ---------- Job sections (one per scrape) ---------- */
+    .job-section { margin-bottom: 16px; }
+
+    .job-header {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 10px;
+    }
+    .job-header:focus-visible {
+      outline: 3px solid rgba(249,115,22,0.35);
+      outline-offset: 2px;
+    }
+
+    .job-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .job-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70ch;
+    }
+
+    .job-meta {
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .job-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .job-btn {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      color: var(--text);
+      font-weight: 900;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .job-btn:hover {
+      border-color: rgba(249,115,22,0.22);
+      background: rgba(249,115,22,0.08);
+    }
+
+    .chev {
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: 0.2px;
+      padding: 0 6px;
+    }
+
+    /* Scrollbar + collapse for each job's comments panel */
+    .job-panel {
+      max-height: min(65vh, 650px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      opacity: 1;
+      transform: translateY(0);
+      transition: max-height 260ms ease, opacity 160ms ease, transform 160ms ease;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .job-panel.collapsed {
+      max-height: 0px;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(-6px);
+      border-top: none;
+    }
+
+    @media (max-width: 768px) {
+      .nav-container { align-items: flex-start; flex-direction: column; }
+      .nav-links { justify-content: flex-start; }
+      .container { padding: 16px; }
+      .confidence-bar { min-width: unset; }
+      .bar { width: 90px; }
+      .job-title { max-width: 40ch; }
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="nav-brand">🛡️ reTox</a>
+      <ul class="nav-links">
+        <li><a href="/">🏠 Home</a></li>
+        <li><a href="/dashboard" class="active">📊 Dashboard</a></li>
+        <li><a href="/moderation">🛡️ Moderation</a></li>
+        <li><a href="/admin">⚙️ Admin</a></li>
+        <li><a href="/health" target="_blank">💚 Status</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    <header>
+      <h1>
+        <span class="status-indicator"></span>
+        ReTox - Context-Aware Multi-Agent Toxicity Detection
+      </h1>
+      <p class="subtitle">Dashboard: scrapes + scored comments + moderator notes (auto refresh)</p>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">📊 Total Comments</div>
+        <div class="card-value" id="totalComments">0</div>
+        <div class="card-label">Processed</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⚠️ Average Toxicity</div>
+        <div class="card-value" id="avgToxicity">0.0%</div>
+        <div class="card-label">Across all comments</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👤 Moderator Reviews</div>
+        <div class="card-value" id="totalReviews">0</div>
+        <div class="card-label">Gold labels</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🤖 Model Accuracy</div>
+        <div class="card-value" id="modelAccuracy">0%</div>
+        <div class="card-label">Current performance</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔄 Retraining Cycles</div>
+        <div class="card-value" id="retrainingCycles">0</div>
+        <div class="card-label">Total versions</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">❌ False Negatives</div>
+        <div class="card-value" id="falseNegatives">0</div>
+        <div class="card-label">Missed toxic</div>
+      </div>
+    </div>
+
+    <div class="table">
+      <table>
+        <thead>
+          <tr>
+            <th>Model Version</th>
+            <th>Accuracy</th>
+            <th>False Positives</th>
+            <th>False Negatives</th>
+            <th>Training Samples</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody id="trainingHistory">
+          <tr>
+            <td colspan="6" class="loading">
+              <div class="spinner"></div>
+              Loading training history...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table">
+      <div class="section-title">🧲 Recent Scrapes (click one to jump)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Subreddit</th>
+            <th>URL</th>
+            <th>Status</th>
+            <th>Collected</th>
+          </tr>
+        </thead>
+        <tbody id="scrapeJobs">
+          <tr>
+            <td colspan="5" class="loading">
+              <div class="spinner"></div>
+              Loading scrapes...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- One collapsible section per job (job#1, job#2, ...) -->
+    <div id="jobSections"></div>
+
+  </div>
+
+  <script>
+    function safeNum(v, fallback = 0) {
+      return (typeof v === 'number' && !Number.isNaN(v)) ? v : fallback;
+    }
+
+    function esc(s) {
+      return String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+
+    function fmtDateMaybe(value) {
+      if (!value) return '—';
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return String(value);
+      return d.toLocaleString();
+    }
+
+    function badgeClass(value) {
+      const v = String(value ?? '').toLowerCase();
+      if (!v) return 'badge-clean';
+      if (v.includes('toxic') || v.includes('reject')) return 'badge-toxic';
+      if (v.includes('borderline') || v.includes('needs_context')) return 'badge-borderline';
+      return 'badge-clean';
+    }
+
+    const COMMENT_LIMIT_PER_JOB = 500;
+    const STORAGE_HIDDEN_JOBS = 'retox_hidden_job_ids_v1';
+
+    const jobSectionsEl = document.getElementById('jobSections');
+
+    let knownJobIds = new Set();
+    let expandedJobIds = new Set();     // which job panels are open
+    let hiddenJobIds = new Set();       // user "deleted" sections (UI hide)
+    let commentsCache = new Map();      // jobId -> comments[]
+    let commentsLoading = new Set();    // jobIds in-flight
+
+    function loadHiddenJobs() {
+      try {
+        const raw = localStorage.getItem(STORAGE_HIDDEN_JOBS);
+        const arr = raw ? JSON.parse(raw) : [];
+        hiddenJobIds = new Set((arr || []).map(Number).filter(n => Number.isFinite(n)));
+      } catch {
+        hiddenJobIds = new Set();
+      }
+    }
+
+    function saveHiddenJobs() {
+      try {
+        localStorage.setItem(STORAGE_HIDDEN_JOBS, JSON.stringify(Array.from(hiddenJobIds)));
+      } catch {}
+    }
+
+    function setExpanded(jobId, open) {
+      const id = Number(jobId);
+      if (!Number.isFinite(id)) return;
+
+      if (open) expandedJobIds.add(id);
+      else expandedJobIds.delete(id);
+
+      const panel = document.getElementById(`job-panel-${id}`);
+      const chev = document.getElementById(`job-chev-${id}`);
+      const header = document.getElementById(`job-header-${id}`);
+      if (panel) panel.classList.toggle('collapsed', !open);
+      if (chev) chev.textContent = open ? '▾' : '▸';
+      if (header) header.setAttribute('aria-expanded', String(open));
+
+      if (open) {
+        ensureJobCommentsLoaded(id);
+      }
+    }
+
+    function collapseAllExcept(jobIdToKeepOpen) {
+      const keep = Number(jobIdToKeepOpen);
+      expandedJobIds = new Set([keep]);
+      for (const id of Array.from(knownJobIds)) {
+        if (id === keep) setExpanded(id, true);
+        else setExpanded(id, false);
+      }
+    }
+
+    function deleteJobSection(jobId) {
+      const id = Number(jobId);
+      if (!Number.isFinite(id)) return;
+
+      hiddenJobIds.add(id);
+      saveHiddenJobs();
+
+      // Remove section from DOM immediately
+      const section = document.getElementById(`job-section-${id}`);
+      if (section) section.remove();
+
+      // Also remove from scrapeJobs table highlight
+      renderScrapeJobsTable(lastJobsData || []);
+    }
+
+    function scrollToJob(jobId) {
+      const el = document.getElementById(`job-section-${jobId}`);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function ensureJobCommentsLoaded(jobId) {
+      const id = Number(jobId);
+      if (!Number.isFinite(id)) return;
+      if (commentsCache.has(id)) {
+        renderJobComments(id, commentsCache.get(id));
+        return;
+      }
+      if (commentsLoading.has(id)) return;
+
+      commentsLoading.add(id);
+      renderJobCommentsLoading(id);
+
+      try {
+        const res = await fetch(`/api/dashboard/collection-jobs/${id}/comments?limit=${COMMENT_LIMIT_PER_JOB}`);
+        const data = await res.json();
+        const comments = data.comments || [];
+        commentsCache.set(id, comments);
+        renderJobComments(id, comments);
+      } catch (e) {
+        renderJobCommentsError(id, String(e));
+      } finally {
+        commentsLoading.delete(id);
+      }
+    }
+
+    function renderJobCommentsLoading(jobId) {
+      const tbody = document.getElementById(`job-comments-${jobId}`);
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="6" class="loading muted">Loading comments…</td></tr>`;
+    }
+
+    function renderJobCommentsError(jobId, msg) {
+      const tbody = document.getElementById(`job-comments-${jobId}`);
+      if (!tbody) return;
+      tbody.innerHTML = `<tr><td colspan="6" class="loading">Failed to load comments: ${esc(msg)}</td></tr>`;
+    }
+
+    function renderJobComments(jobId, comments) {
+      const tbody = document.getElementById(`job-comments-${jobId}`);
+      if (!tbody) return;
+
+      const html = (comments || []).map(c => {
+        const fullText = String(c.text || '');
+        const preview = fullText.length > 140 ? fullText.substring(0, 140) + '…' : fullText;
+
+        const score = safeNum(c.score, 0);
+        const conf = safeNum(c.confidence, 0);
+        const scorePct = Math.round(score * 100);
+        const confPct = Math.round(conf * 100);
+
+        const aiCat = (c.category || 'clean').toLowerCase();
+        const reviewed = !!c.review_decision;
+
+        const reviewDecision = c.review_decision ? String(c.review_decision).toLowerCase() : '';
+        const notes = c.review_notes ? String(c.review_notes) : '';
+
+        return `
+          <tr>
+            <td>
+              ${esc(preview)}
+              <div class="muted" style="margin-top:6px;">
+                ${c.reddit_permalink ? `<a class="link" href="${esc(c.reddit_permalink)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">open</a>` : ''}
+                <span style="margin-left:10px;">${esc(fmtDateMaybe(c.created_at))}</span>
+              </div>
+            </td>
+            <td>u/${esc(c.author || '')}<div class="muted">r/${esc(c.subreddit || '')}</div></td>
+            <td>${scorePct}%</td>
+            <td>
+              <div class="confidence-bar">
+                <div class="bar"><div class="bar-fill" style="width:${confPct}%"></div></div>
+                ${confPct}%
+              </div>
+            </td>
+            <td>
+              <span class="badge ${badgeClass(aiCat)}">${esc(aiCat)}</span>
+              ${reviewed ? `<span class="badge badge-reviewed">reviewed</span>` : ''}
+            </td>
+            <td>
+              ${reviewed ? `
+                <div>
+                  <span class="badge ${badgeClass(reviewDecision)}">${esc(reviewDecision)}</span>
+                  <div class="muted" style="margin-top:6px;">${esc(fmtDateMaybe(c.reviewed_at))}</div>
+                  ${notes ? `<div class="notes" style="margin-top:10px;">${esc(notes)}</div>` : `<div class="muted" style="margin-top:8px;">No notes</div>`}
+                </div>
+              ` : `<span class="muted">Not reviewed</span>`}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.innerHTML = html || `<tr><td colspan="6" class="loading muted">No comments for this job (yet)</td></tr>`;
+    }
+
+    function ensureJobSection(job) {
+      const id = Number(job.id);
+      if (!Number.isFinite(id)) return;
+      if (hiddenJobIds.has(id)) return;
+
+      const existing = document.getElementById(`job-section-${id}`);
+      if (existing) return;
+
+      const when = job.completed_at || job.created_at;
+      const urlShort = String(job.url || '').length > 70 ? String(job.url).slice(0, 70) + '…' : String(job.url || '');
+      const title = `🧾 job #${id} • r/${job.subreddit || '—'} • ${fmtDateMaybe(when)}`;
+
+      const sectionHtml = `
+        <div class="table job-section" id="job-section-${id}">
+          <div
+            class="section-title job-header"
+            id="job-header-${id}"
+            role="button"
+            tabindex="0"
+            aria-expanded="false"
+            data-job-id="${id}"
+          >
+            <div class="job-header-left">
+              <span class="chev" id="job-chev-${id}">▸</span>
+              <span class="job-title">${esc(title)}</span>
+              <span class="job-meta">${esc(job.status || '')} • ${esc(job.comments_collected ?? 0)} collected</span>
+            </div>
+
+            <div class="job-actions" onclick="event.stopPropagation()">
+              ${job.url ? `<a class="link" href="${esc(job.url)}" target="_blank" rel="noreferrer">source</a>` : ''}
+              <button class="job-btn" data-action="delete" data-job-id="${id}" type="button">Delete</button>
+            </div>
+          </div>
+
+          <div class="job-panel collapsed" id="job-panel-${id}">
+            <table>
+              <thead>
+                <tr>
+                  <th>Comment</th>
+                  <th>Author</th>
+                  <th>Score</th>
+                  <th>Confidence</th>
+                  <th>AI Category</th>
+                  <th>Review + Notes</th>
+                </tr>
+              </thead>
+              <tbody id="job-comments-${id}">
+                <tr><td colspan="6" class="loading muted">Expand to load comments…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      // Insert newest jobs at top
+      jobSectionsEl.insertAdjacentHTML('afterbegin', sectionHtml);
+    }
+
+    function renderJobSections(jobs) {
+      for (const job of jobs) {
+        ensureJobSection(job);
+      }
+
+      // Remove sections that no longer exist in list or got hidden
+      const ids = new Set(jobs.map(j => Number(j.id)).filter(n => Number.isFinite(n)));
+      for (const el of Array.from(jobSectionsEl.querySelectorAll('.job-section'))) {
+        const m = el.id.match(/^job-section-(\d+)$/);
+        const id = m ? Number(m[1]) : null;
+        if (!id) continue;
+        if (!ids.has(id) || hiddenJobIds.has(id)) el.remove();
+      }
+
+      // Apply expanded/collapsed state
+      for (const job of jobs) {
+        const id = Number(job.id);
+        if (!Number.isFinite(id)) continue;
+        setExpanded(id, expandedJobIds.has(id));
+      }
+    }
+
+    let lastJobsData = null;
+
+    function renderScrapeJobsTable(jobs) {
+      const tbody = document.getElementById('scrapeJobs');
+      if (!tbody) return;
+
+      const visible = (jobs || []).filter(j => !hiddenJobIds.has(Number(j.id)));
+      const html = visible.map(j => {
+        const when = j.completed_at || j.created_at;
+        const urlShort = String(j.url || '').length > 55 ? String(j.url).slice(0, 55) + '…' : String(j.url || '');
+        const isOpen = expandedJobIds.has(Number(j.id));
+
+        return `
+          <tr class="row-click"
+              onclick="window.__jumpToJob(${Number(j.id)})"
+              style="${isOpen ? 'background: rgba(249,115,22,0.08);' : ''}">
+            <td>${esc(fmtDateMaybe(when))}</td>
+            <td>r/${esc(j.subreddit || '—')}</td>
+            <td><a class="link" href="${esc(j.url)}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">${esc(urlShort)}</a></td>
+            <td class="muted">${esc(j.status || '—')}</td>
+            <td>${esc(j.comments_collected ?? 0)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.innerHTML = html || '<tr><td colspan="5" class="loading">No scrapes yet</td></tr>';
+    }
+
+    // for onclick in table rows (kept simple)
+    window.__jumpToJob = (jobId) => {
+      const id = Number(jobId);
+      if (!Number.isFinite(id)) return;
+
+      // open this job, collapse others
+      collapseAllExcept(id);
+      scrollToJob(id);
+    };
+
+    async function updateKpisAndTraining() {
+      const [statsRes, historyRes] = await Promise.all([
+        fetch('/api/dashboard/stats'),
+        fetch('/api/training/history')
+      ]);
+
+      const statsData = await statsRes.json();
+      const historyData = await historyRes.json();
+
+      const summary = statsData.summary || statsData;
+
+      document.getElementById('totalComments').textContent = summary.total_comments ?? 0;
+
+      const avg = safeNum(summary.average_toxicity ?? summary.avg_toxicity, 0);
+      document.getElementById('avgToxicity').textContent = `${(avg * 100).toFixed(1)}%`;
+
+      document.getElementById('totalReviews').textContent = summary.total_reviews ?? 0;
+
+      if (summary.accuracy_percent != null) {
+        document.getElementById('modelAccuracy').textContent = `${safeNum(summary.accuracy_percent, 0).toFixed(1)}%`;
+      } else {
+        const modelAcc = safeNum(summary.model_accuracy, 0);
+        document.getElementById('modelAccuracy').textContent = `${(modelAcc * 100).toFixed(0)}%`;
+      }
+
+      document.getElementById('retrainingCycles').textContent =
+        historyData.total_retrains ?? (historyData.models ? historyData.models.length : 0);
+
+      document.getElementById('falseNegatives').textContent = summary.false_negatives ?? 0;
+
+      const models = historyData.models || [];
+      const historyHtml = models.map(m => {
+        const version = m.version ?? 'v1';
+        const accuracyAfter = safeNum(m.accuracy_after, 0);
+        const fp = m.false_positives_after ?? m.false_positives ?? 0;
+        const fn = m.false_negatives_after ?? m.false_negatives ?? 0;
+        const samples = m.training_samples ?? m.samples_trained ?? 0;
+        const created = m.created_at ?? m.training_date ?? null;
+
+        return `
+          <tr>
+            <td>${esc(version)}</td>
+            <td>${(accuracyAfter * 100).toFixed(1)}%</td>
+            <td>${esc(fp)}</td>
+            <td>${esc(fn)}</td>
+            <td>${esc(samples)}</td>
+            <td>${esc(fmtDateMaybe(created))}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('trainingHistory').innerHTML =
+        historyHtml || '<tr><td colspan="6" class="loading">No training history</td></tr>';
+    }
+
+    async function loadScrapeJobsAndSections() {
+      const res = await fetch('/api/dashboard/collection-jobs?limit=25');
+      const data = await res.json();
+      const jobs = (data.jobs || []).filter(j => j && j.id != null);
+
+      lastJobsData = jobs;
+
+      // detect new job(s)
+      const numericIds = jobs.map(j => Number(j.id)).filter(n => Number.isFinite(n));
+      const newIds = numericIds.filter(id => !knownJobIds.has(id));
+
+      // update known set
+      knownJobIds = new Set(numericIds);
+
+      // If new job appeared, auto-open newest and collapse others
+      if (newIds.length > 0) {
+        const newest = numericIds[0]; // list is newest-first
+        if (Number.isFinite(newest)) {
+          collapseAllExcept(newest);
+          // ensure section exists, then scroll a bit so user sees it
+          ensureJobSection(jobs.find(j => Number(j.id) === newest));
+          setTimeout(() => scrollToJob(newest), 50);
+        }
+      } else {
+        // If nothing is open yet, open newest by default
+        if (expandedJobIds.size === 0 && numericIds.length > 0) {
+          collapseAllExcept(numericIds[0]);
+        }
+      }
+
+      // render
+      renderScrapeJobsTable(jobs.filter(j => !hiddenJobIds.has(Number(j.id))));
+      renderJobSections(jobs.filter(j => !hiddenJobIds.has(Number(j.id))));
+    }
+
+    function initJobSectionInteractions() {
+      // Click + keyboard toggle on headers, delete buttons
+      jobSectionsEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action="delete"]');
+        if (btn) {
+          const id = Number(btn.getAttribute('data-job-id'));
+          deleteJobSection(id);
+          return;
+        }
+
+        // don’t toggle if user clicked a link
+        if (e.target.closest('a')) return;
+
+        const header = e.target.closest('.job-header');
+        if (!header) return;
+
+        const id = Number(header.getAttribute('data-job-id'));
+        if (!Number.isFinite(id)) return;
+
+        const willOpen = !expandedJobIds.has(id);
+
+        // behavior: opening one collapses others (clean view)
+        if (willOpen) collapseAllExcept(id);
+        else setExpanded(id, false);
+      });
+
+      jobSectionsEl.addEventListener('keydown', (e) => {
+        const header = e.target.closest('.job-header');
+        if (!header) return;
+
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const id = Number(header.getAttribute('data-job-id'));
+          if (!Number.isFinite(id)) return;
+
+          const willOpen = !expandedJobIds.has(id);
+          if (willOpen) collapseAllExcept(id);
+          else setExpanded(id, false);
+        }
+      });
+    }
+
+    async function updateAll() {
+      try {
+        await updateKpisAndTraining();
+        await loadScrapeJobsAndSections();
+      } catch (e) {
+        console.error('Dashboard update error:', e);
+      }
+    }
+
+    // init
+    loadHiddenJobs();
+    initJobSectionInteractions();
+    updateAll();
+    setInterval(updateAll, 5000);
+  </script>
+</body>
+</html>

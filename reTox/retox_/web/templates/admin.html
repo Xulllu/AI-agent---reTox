@@ -1,0 +1,584 @@
+<!-- web/templates/admin.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReTox Admin - System Controls</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #07070a;
+      --surface: #0f1115;
+      --surface2: #121622;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+
+      --brand: #c2410c;        /* dark orange */
+      --brand-2: #f97316;      /* highlight orange */
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(249,115,22,0.16), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(194,65,12,0.12), transparent 55%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    /* === NAVIGATION (same as Home) === */
+    nav {
+      background: rgba(0,0,0,0.65);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--brand-2);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      list-style: none;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      border-color: rgba(249,115,22,0.22);
+      background: rgba(249,115,22,0.10);
+    }
+
+    .nav-links a.active {
+      background: linear-gradient(135deg, rgba(194,65,12,0.95), rgba(249,115,22,0.85));
+      color: #0b0b0f;
+    }
+
+    .nav-links a:focus-visible {
+      outline: 3px solid rgba(249,115,22,0.35);
+      outline-offset: 2px;
+    }
+
+    /* === LAYOUT === */
+    header {
+      max-width: 1100px;
+      margin: 22px auto 0;
+      padding: 22px 20px;
+    }
+
+    header h1 {
+      font-size: 26px;
+      margin-bottom: 6px;
+      letter-spacing: 0.2px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 16px auto 40px;
+      padding: 0 20px;
+    }
+
+    .section {
+      background: rgba(15,17,21,0.75);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 900;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      letter-spacing: 0.3px;
+    }
+
+    .section-title::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: linear-gradient(135deg, rgba(194,65,12,0.95), rgba(249,115,22,0.90));
+      border-radius: 2px;
+    }
+
+    /* === STATS === */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-box {
+      background: rgba(18,22,34,0.90);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 12px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--brand-2);
+    }
+
+    /* === CONTROLS === */
+    .control-group { margin-bottom: 16px; }
+
+    .control-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 8px;
+    }
+
+    .control-description {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 18px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 900;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(194,65,12,0.95), rgba(249,115,22,0.90));
+      color: #0b0b0f;
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); }
+
+    .btn-success {
+      background: rgba(16,185,129,0.15);
+      border-color: rgba(16,185,129,0.35);
+      color: var(--text);
+    }
+
+    .btn-success:hover { background: rgba(16,185,129,0.22); transform: translateY(-1px); }
+
+    .btn-danger {
+      background: rgba(239,68,68,0.15);
+      border-color: rgba(239,68,68,0.35);
+      color: var(--text);
+    }
+
+    .btn-danger:hover { background: rgba(239,68,68,0.22); transform: translateY(-1px); }
+
+    /* Status cards */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .status {
+      background: rgba(18,22,34,0.90);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 12px;
+      border-left: 3px solid rgba(249,115,22,0.70);
+    }
+
+    .status-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+
+    .status-value {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--text);
+    }
+
+    /* Alerts */
+    .alert {
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      background: rgba(18,22,34,0.65);
+    }
+
+    .alert-success { border-color: rgba(16,185,129,0.35); }
+    .alert-error { border-color: rgba(239,68,68,0.35); }
+
+    /* Danger zone */
+    .danger-zone {
+      border: 1px solid rgba(239,68,68,0.35);
+      background: rgba(239,68,68,0.08);
+      padding: 14px;
+      border-radius: 12px;
+      margin-top: 14px;
+    }
+
+    .danger-zone-title {
+      color: #fca5a5;
+      font-weight: 900;
+      margin-bottom: 8px;
+      letter-spacing: 0.2px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(15,17,21,0.92);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      border-radius: 14px;
+      backdrop-filter: blur(12px);
+    }
+
+    .modal-header {
+      font-size: 16px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .modal-body {
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    /* Loading spinner */
+    .loading {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255,255,255,0.18);
+      border-top: 3px solid rgba(249,115,22,0.85);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      header { margin-top: 16px; }
+      .nav-container { align-items: flex-start; flex-direction: column; }
+      .nav-links { justify-content: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVIGATION -->
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="nav-brand">🛡️ reTox</a>
+      <ul class="nav-links">
+        <li><a href="/">🏠 Home</a></li>
+        <li><a href="/dashboard">📊 Dashboard</a></li>
+        <li><a href="/moderation">🛡️ Moderation</a></li>
+        <li><a href="/admin" class="active">⚙️ Admin</a></li>
+        <li><a href="/health" target="_blank">💚 Status</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header>
+    <h1>⚙️ ReTox Admin Panel</h1>
+    <p>System controls, training management, and data export</p>
+  </header>
+
+  <div class="container">
+    <div id="alerts"></div>
+
+    <!-- Training Management -->
+    <div class="section">
+      <div class="section-title">🤖 Model Training</div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Current Version</div>
+          <div class="stat-value" id="currentVersion">v1</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Gold Labels</div>
+          <div class="stat-value" id="goldLabels">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Model Accuracy</div>
+          <div class="stat-value" id="modelAccuracy">--</div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">Manual Training</div>
+        <div class="control-description">Trigger immediate model retraining with current gold labels</div>
+        <button class="btn btn-primary" onclick="manualTrain()">
+          <span id="trainBtnText">🔄 Train Model</span>
+        </button>
+      </div>
+
+      <div class="danger-zone">
+        <div class="danger-zone-title">⚠️ Danger Zone</div>
+        <div class="control-description">Delete all training history. Model will reset to v1. This action cannot be undone.</div>
+        <button class="btn btn-danger" onclick="confirmDelete()">🗑️ Delete Training History</button>
+      </div>
+    </div>
+
+    <!-- Data Export -->
+    <div class="section">
+      <div class="section-title">📊 Data Export</div>
+
+      <div class="control-group">
+        <div class="control-label">Gold Labels Export</div>
+        <div class="control-description">Download all moderator-reviewed comments as CSV</div>
+        <button class="btn btn-success" onclick="exportGoldLabels()">📥 Export CSV</button>
+      </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="section">
+      <div class="section-title">📈 System Status</div>
+
+      <div class="status-grid">
+        <div class="status">
+          <div class="status-label">Total Comments Processed</div>
+          <div class="status-value" id="totalComments">0</div>
+        </div>
+
+        <div class="status">
+          <div class="status-label">Last Retraining</div>
+          <div class="status-value" id="lastRetrain">Never</div>
+        </div>
+
+        <div class="status">
+          <div class="status-label">Training Enabled</div>
+          <div class="status-value" id="trainingEnabled">Yes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">⚠️ Confirm Delete</div>
+      <div class="modal-body">
+        This will permanently delete all training history and reset the model to v1. This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="deleteTraining()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadStatus() {
+      try {
+        const [trainingRes, historyRes, statsRes] = await Promise.all([
+          fetch('/api/training/status'),
+          fetch('/api/training/history'),
+          fetch('/api/dashboard/stats')
+        ]);
+
+        const trainingData = await trainingRes.json();
+        const historyData = await historyRes.json();
+        const statsData = await statsRes.json();
+
+        // Version + gold labels
+        document.getElementById('currentVersion').textContent = `v${historyData.total_retrains || 1}`;
+        document.getElementById('goldLabels').textContent = trainingData.gold_labels_since_last_train ?? 0;
+
+        // Last retrain
+        if (trainingData.last_retrain_date) {
+          const date = new Date(trainingData.last_retrain_date);
+          document.getElementById('lastRetrain').textContent = date.toLocaleString();
+        } else {
+          document.getElementById('lastRetrain').textContent = 'Never';
+        }
+
+        // Training enabled
+        document.getElementById('trainingEnabled').textContent =
+          trainingData.retraining_enabled ? 'Yes ✓' : 'No ✗';
+
+        // Total comments (dashboard stats returns { summary: {...} })
+        const total = statsData?.summary?.total_comments ?? 0;
+        document.getElementById('totalComments').textContent = total;
+
+        // Optional: show accuracy in header card if present
+        if (statsData?.summary?.accuracy_percent != null) {
+          document.getElementById('modelAccuracy').textContent = `${statsData.summary.accuracy_percent.toFixed(1)}%`;
+        } else {
+          document.getElementById('modelAccuracy').textContent = '--';
+        }
+
+      } catch (error) {
+        console.error('Error loading status:', error);
+      }
+    }
+
+    async function manualTrain() {
+      const btn = document.querySelector('[onclick="manualTrain()"]');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span> Training...';
+
+      try {
+        const response = await fetch('/api/admin/training/manual-train', { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert(`✓ Training completed! New version: ${data.new_version} (Improvement: ${(data.improvement * 100).toFixed(1)}%)`, 'success');
+          loadStatus();
+        } else {
+          showAlert(`Error: ${data.error}`, 'error');
+        }
+      } catch (error) {
+        showAlert('Error training model', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span id="trainBtnText">🔄 Train Model</span>';
+      }
+    }
+
+    function confirmDelete() {
+      document.getElementById('confirmModal').classList.add('active');
+    }
+
+    async function deleteTraining() {
+      try {
+        const response = await fetch('/api/admin/training/delete-history', { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert('✓ Training history deleted', 'success');
+          closeModal();
+          loadStatus();
+        } else {
+          showAlert('Error deleting training', 'error');
+        }
+      } catch (error) {
+        showAlert('Error deleting training', 'error');
+      }
+    }
+
+    function exportGoldLabels() {
+      window.location.href = '/api/admin/export-gold-labels';
+    }
+
+    function showAlert(message, type) {
+      const alertsDiv = document.getElementById('alerts');
+      const alert = document.createElement('div');
+      alert.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+      alert.textContent = message;
+      alertsDiv.appendChild(alert);
+      setTimeout(() => alert.remove(), 5000);
+    }
+
+    function closeModal() {
+      document.getElementById('confirmModal').classList.remove('active');
+    }
+
+    loadStatus();
+    setInterval(loadStatus, 30000);
+  </script>
+</body>
+</html>

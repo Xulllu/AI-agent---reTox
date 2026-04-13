@@ -1,0 +1,424 @@
+<!-- web/templates/home.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>reTox - Toxicity Detection & Moderation</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #07070a;
+      --surface: #0f1115;
+      --surface2: #121622;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+
+      --brand: #c2410c;        /* dark orange */
+      --brand-2: #f97316;      /* highlight orange */
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(249,115,22,0.18), transparent 60%),
+        radial-gradient(900px 500px at 80% 20%, rgba(194,65,12,0.12), transparent 55%),
+        var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === NAVIGATION (fixed + consistent) === */
+    nav {
+      background: rgba(0,0,0,0.65);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--brand-2);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      list-style: none;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      border-color: rgba(249,115,22,0.22);
+      background: rgba(249,115,22,0.10);
+    }
+
+    .nav-links a.active {
+      background: linear-gradient(135deg, rgba(194,65,12,0.95), rgba(249,115,22,0.85));
+      color: #0b0b0f;
+    }
+
+    .nav-links a:focus-visible {
+      outline: 3px solid rgba(249,115,22,0.35);
+      outline-offset: 2px;
+    }
+
+    /* === MAIN === */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.4px;
+      text-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    }
+
+    .tagline {
+      font-size: 1.25rem;
+      margin-bottom: 2.5rem;
+      color: var(--muted);
+      max-width: 900px;
+    }
+
+    /* Feature Grid */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      max-width: 1200px;
+      width: 100%;
+      margin: 1.5rem 0;
+    }
+
+    .feature-card {
+      background: linear-gradient(180deg, rgba(18,22,34,0.95), rgba(15,17,21,0.95));
+      color: var(--text);
+      padding: 1.75rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+      text-align: left;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(249,115,22,0.25);
+    }
+
+    .feature-icon {
+      font-size: 2.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card h3 {
+      margin-bottom: 0.35rem;
+      color: var(--brand-2);
+      font-size: 1.05rem;
+      letter-spacing: 0.2px;
+    }
+
+    .feature-card p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* CTA Buttons */
+    .cta-buttons {
+      display: flex;
+      gap: 0.9rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.85rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      font-weight: 800;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(194,65,12,0.95), rgba(249,115,22,0.90));
+      color: #0b0b0f;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border-color: rgba(249,115,22,0.25);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(249,115,22,0.10);
+    }
+
+    /* Stats Section */
+    .stats {
+      background: rgba(15,17,21,0.75);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      padding: 1.25rem;
+      border-radius: 14px;
+      margin-top: 2.5rem;
+      max-width: 1000px;
+      width: 100%;
+      box-shadow: var(--shadow);
+      text-align: left;
+    }
+
+    .stats h3 {
+      margin-bottom: 1rem;
+      font-size: 1.15rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Horizontal cards */
+    .stats-grid {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      min-width: 160px;
+      flex: 1;
+      background: rgba(18,22,34,0.90);
+      border: 1px solid var(--border);
+      padding: 14px 14px;
+      border-radius: 12px;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--brand-2);
+      letter-spacing: 0.3px;
+      line-height: 1.2;
+    }
+
+    .stats-loading {
+      text-align: center;
+      color: var(--muted);
+      padding: 8px 0;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(0,0,0,0.55);
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2.2rem; }
+      .tagline { font-size: 1.05rem; }
+      main { padding: 3rem 1.25rem; }
+      .features { grid-template-columns: 1fr; }
+      .cta-buttons { flex-direction: column; align-items: stretch; width: 100%; max-width: 420px; }
+      .btn { justify-content: center; }
+      .nav-container { align-items: flex-start; flex-direction: column; }
+      .nav-links { justify-content: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="nav-brand">🛡️ reTox</a>
+      <ul class="nav-links">
+        <li><a href="/" class="active">🏠 Home</a></li>
+        <li><a href="/dashboard">📊 Dashboard</a></li>
+        <li><a href="/moderation">🛡️ Moderation</a></li>
+        <li><a href="/admin">⚙️ Admin</a></li>
+        <li><a href="/health" target="_blank">💚 Status</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main>
+    <h1>reTox</h1>
+    <p class="tagline">AI-Powered Toxicity Detection & Moderation System</p>
+
+    <!-- Feature Cards -->
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>AI Classification</h3>
+        <p>Advanced ML model for detecting toxic comments with high accuracy. Real-time processing with confidence scoring.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Smart Dashboard</h3>
+        <p>Real-time analytics and monitoring. Track comment volume, toxicity trends, and model performance metrics.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <h3>Moderation Tools</h3>
+        <p>Streamlined interface for moderators to review, approve, and reject flagged comments with detailed explanations.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <h3>Continuous Learning</h3>
+        <p>Model automatically retrains on moderator feedback (gold labels) to improve accuracy over time.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⚙️</div>
+        <h3>Admin Controls</h3>
+        <p>Full system management including training history, data export, and advanced configuration options.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3>Reddit Integration</h3>
+        <p>Direct integration with Reddit API. Bulk scrape and analyze comments from any subreddit or thread.</p>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="cta-buttons">
+      <a href="/dashboard" class="btn btn-primary">📊 View Dashboard</a>
+      <a href="/moderation" class="btn btn-primary">👥 Go to Moderation</a>
+      <a href="/admin" class="btn btn-secondary">⚙️ Admin Panel</a>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats">
+      <h3>System Status</h3>
+      <div id="stats-container">
+        <p class="stats-loading">Loading stats...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 reTox - Intelligent Toxicity Detection | Phase 5 Release</p>
+  </footer>
+
+  <script>
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/dashboard/stats');
+        const data = await response.json();
+
+        const statsHtml = `
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-label">Total Comments</div>
+              <div class="stat-value">${data.summary.total_comments}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Avg Toxicity</div>
+              <div class="stat-value">${(data.summary.average_toxicity * 100).toFixed(1)}%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Reviews</div>
+              <div class="stat-value">${data.summary.total_reviews}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Accuracy</div>
+              <div class="stat-value">${data.summary.accuracy_percent.toFixed(1)}%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Model Versions</div>
+              <div class="stat-value">${data.summary.retrain_cycles}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Gold Labels</div>
+              <div class="stat-value">${data.summary.gold_labels}/${data.summary.gold_threshold}</div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('stats-container').innerHTML = statsHtml;
+      } catch (error) {
+        console.error('Error loading stats:', error);
+        document.getElementById('stats-container').innerHTML =
+          '<p class="stats-loading">Unable to load stats</p>';
+      }
+    }
+
+    loadStats();
+    setInterval(loadStats, 30000);
+  </script>
+</body>
+</html>
